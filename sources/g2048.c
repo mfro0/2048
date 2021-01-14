@@ -70,31 +70,34 @@
 #define WDW_STYLE NAME | INFO | CLOSER | MOVER
 
 
-static WORD gl_wchar;               /* character width          */
-static WORD gl_hchar;               /* character height          */
-static WORD gl_wbox;               /* box (cell) width          */
-static WORD gl_hbox;               /* box (cell) height          */
-static WORD gem_handle;               /* GEM vdi handle          */
-static WORD     vdi_handle;               /* g2048 vdi handle          */
-static WORD     work_out[57];               /* open virt workstation values     */
+static short gl_wchar;               /* character width          */
+static short gl_hchar;               /* character height          */
+static short gl_wbox;               /* box (cell) width          */
+static short gl_hbox;               /* box (cell) height          */
+static short gem_handle;               /* GEM vdi handle          */
+static short     vdi_handle;               /* g2048 vdi handle          */
+static short     work_out[57];               /* open virt workstation values     */
 static GRECT     work_area;               /* current window work area     */
-static WORD     gl_rmsg[8];               /* message buffer          */
+static short     gl_rmsg[8];               /* message buffer          */
 
-static WORD     gl_itemg2048 = 0;          /* g2048 menu item          */
-static WORD     gl_xfull;               /* full window 'x'          */
-static WORD     gl_yfull;               /* full window 'y'          */
-static WORD     gl_wfull;               /* full window 'w' width     */
-static WORD     gl_hfull;               /* full window 'h' height     */
-static WORD     ev_which;               /* event message returned value     */
-WORD     g2048_whndl = 0;          /* g2048 window handle          */
-WORD     type_size;               /* system font cell size     */
+static short     gl_itemg2048 = 0;          /* g2048 menu item          */
+static short     gl_xfull;               /* full window 'x'          */
+static short     gl_yfull;               /* full window 'y'          */
+static short     gl_wfull;               /* full window 'w' width     */
+static short     gl_hfull;               /* full window 'h' height     */
+static short     ev_which;               /* event message returned value     */
+
+short     g2048_whndl = 0;          /* g2048 window handle          */
+short     type_size;               /* system font cell size     */
+
 #define     MESS_NLINES     20          /* maximum lines in message     */
 #define     MESS_WIDTH     20          /* maximum width of message     */
-BYTE     *wdw_title =     " 2048 ";
-BYTE     status[32];     /* Score: line */
-BYTE     scoret[80];     /* sprintf() template for "Score:" line */
+
+char     *wdw_title =     " 2048 ";
+char     status[32];     /* Score: line */
+char     scoret[80];     /* sprintf() template for "Score:" line */
 // X_BUF_V2 gl_xbuf;     /* AES abilities from appl_init() */
-WORD     st_textc[16];     /* Text 'contrast' colours */
+short     st_textc[16];     /* Text 'contrast' colours */
 
 GAMEBOARD gl_board, gl_oldboard;     /* Game current and previous state */
 long     gl_hiscore;               /* High score (FreeGEM only) */
@@ -116,9 +119,9 @@ Page*/
 
 
 /* Simple wrapper for form_alert() with message box defined in RSC file */
-WORD rsrc_alert(WORD rsrc, WORD defbtn)
+short rsrc_alert(short rsrc, short defbtn)
 {
-    BYTE *str;
+    char *str;
 
     rsrc_gaddr(R_STRING, rsrc, &str);
 
@@ -163,7 +166,7 @@ void new_game(void)
 /* Compute the union of two rectangles */
 void rc_union(GRECT *p1, GRECT *p2)
 {
-    WORD            tx, ty, tw, th;
+    short            tx, ty, tw, th;
 
     tw = max(p1->g_x + p1->g_w, p2->g_x + p2->g_w);
     th = max(p1->g_y + p1->g_h, p2->g_y + p2->g_h);
@@ -180,9 +183,9 @@ void rc_union(GRECT *p1, GRECT *p2)
 /*------------------------------*/
 /*     do_open               */
 /*------------------------------*/
-WORD do_open(WORD wh, WORD org_x, WORD org_y, WORD x, WORD y, WORD w, WORD h)     /* grow and open specified wdw     */
+short do_open(short wh, short org_x, short org_y, short x, short y, short w, short h)     /* grow and open specified wdw     */
 {
-    WORD     ret_code;
+    short     ret_code;
 
     graf_mouse(2,0x0L);
     graf_growbox(org_x, org_y, 21, 21, x, y, w, h);
@@ -196,9 +199,9 @@ WORD do_open(WORD wh, WORD org_x, WORD org_y, WORD x, WORD y, WORD w, WORD h)   
 /*------------------------------*/
 /*     do_close          */
 /*------------------------------*/
-void do_close(WORD wh,  WORD org_x, WORD org_y)     /* close and shrink specified window     */
+void do_close(short wh,  short org_x, short org_y)     /* close and shrink specified window     */
 {
-    WORD     x, y, w, h;
+    short     x, y, w, h;
 
     graf_mouse(2,0x0L);
     wind_get(wh, WF_WORKXYWH, &x, &y, &w, &h);
@@ -210,9 +213,9 @@ void do_close(WORD wh,  WORD org_x, WORD org_y)     /* close and shrink specifie
 /*------------------------------*/
 /*     set_clip          */
 /*------------------------------*/
-void set_clip(WORD clip_flag, GRECT *s_area)     /* set clip to specified area          */
+void set_clip(short clip_flag, GRECT *s_area)     /* set clip to specified area          */
 {
-    WORD     pxy[4];
+    short     pxy[4];
 
     grect_to_array(s_area, pxy);
     vs_clip(vdi_handle, clip_flag, pxy);
@@ -221,35 +224,39 @@ void set_clip(WORD clip_flag, GRECT *s_area)     /* set clip to specified area  
 /*------------------------------*/
 /*     align_x               */
 /*------------------------------*/
-WORD align_x(WORD x)          /* forces word alignment for column positon,     */
+short align_x(short x)          /* forces word alignment for column positon,     */
 {
-    return((x & 0xfff0) + ((x & 0x000c) ? 0x0010 : 0));
+    return ((x & 0xfff0) + ((x & 0x000c) ? 0x0010 : 0));
 }
 
 /*------------------------------*/
 /*     wdw_size          */
 /*------------------------------*/
-void wdw_size(GRECT *box, WORD w, WORD h)     /* compute window size for given w * h chars     */
+void wdw_size(GRECT *box, short w, short h)     /* compute window size for given w * h chars     */
 {
-    WORD     pw, ph;
+    short     pw, ph;
 
     vst_height(vdi_handle, type_size, &gl_wchar,&gl_hchar,&gl_wbox,&gl_hbox);
 
     pw = w * gl_wbox + 1;
     ph = h * gl_hbox + 1;
+
     wind_calc(WC_BORDER, WDW_STYLE, gl_wfull / 2 - pw / 2, gl_hfull / 2 - ph / 2, pw, ph, &box->g_x, &box->g_y, &box->g_w, &box->g_h);
+
     box->g_x = align_x(box->g_x) - 1;
 }
 
-/* Draw a tile. There are separate code paths for systems with 16 or more
+/*
+ * Draw a tile. There are separate code paths for systems with 16 or more
  * colours (in which case all tiles are solid colour) and those with fewer
- * (tiles are patterned) */
+ * (tiles are patterned)
+ */
 void draw_tile(unsigned short tile, int x, int y)
 {
-    WORD     pxy[10];
-    WORD      ink;
-    WORD     linecol = G_BLACK;
-    BYTE      caption[8];
+    short pxy[10];
+    short ink;
+    short linecol = G_BLACK;
+    char  caption[8];
 
     /* Draw the space at the edge of the tile */
     pxy[0] = x + 5 * gl_wbox - 1;
@@ -261,8 +268,10 @@ void draw_tile(unsigned short tile, int x, int y)
     vsl_color(vdi_handle, G_WHITE);
     v_pline(vdi_handle, 3, pxy);
 
-    /* Draw the tile border; if the tile has the MERGED flag, the border
-     * will be red. */
+    /*
+     * Draw the tile border; if the tile has the MERGED flag, the border
+     * will be red.
+     */
     if (tile & MERGED)
     {
         linecol = G_RED;
@@ -273,6 +282,7 @@ void draw_tile(unsigned short tile, int x, int y)
     pxy[1] = y;
     pxy[2] = x + 5 * gl_wbox - 2;
     pxy[3] = y + 5 * gl_hbox - 2;
+
     /* If the tile is an empty space, draw a 50% grey rectangle. */
     if (tile == 0)
     {
@@ -282,17 +292,21 @@ void draw_tile(unsigned short tile, int x, int y)
         vr_recfl(vdi_handle, pxy);
         return;
     }
+
+
     sprintf(caption, "%d", tile);
 
     /* Compute the colour of the tile. The 2048 tile is red, and
      * lower-numbered tiles will be green, blue, etc. If there are
      * fewer than 16 colours, some or all tiles will appear in black. */
+
     ink = G_RED;
     while (tile < 2048)
     {
         ink++;
         tile *= 2;
     }
+
     vsf_color(vdi_handle, ink);
     if (work_out[13] < 16)
     {
@@ -305,6 +319,7 @@ void draw_tile(unsigned short tile, int x, int y)
     {
         vsf_interior(vdi_handle, 1);
     }
+
     /* Fill the tile */
     vr_recfl(vdi_handle, pxy);
     pxy[0] = x + ((5 - strlen(caption)) * gl_wbox) / 2 - 1;
@@ -344,8 +359,8 @@ void draw_tile(unsigned short tile, int x, int y)
 /*------------------------------*/
 void disp_board(GRECT *clip_area) /* display an area of the board     */
 {
-    WORD     pxy[4];
-    WORD     xcurr, ycurr;
+    short     pxy[4];
+    short     xcurr, ycurr;
     int     row, col;
 
     set_clip(TRUE, clip_area);
@@ -381,7 +396,7 @@ void disp_board(GRECT *clip_area) /* display an area of the board     */
 /*------------------------------*/
 /*     do_redraw          */
 /*------------------------------*/
-void do_redraw(WORD wh, GRECT *area)          /* redraw message applying area clip     */
+void do_redraw(short wh, GRECT *area)          /* redraw message applying area clip     */
 {
     GRECT     box;
 
@@ -431,7 +446,7 @@ BOOLEAN     hndl_mesag()
 {
     GRECT     box;
     BOOLEAN     done;
-    WORD     wdw_hndl;
+    short     wdw_hndl;
 
     done = FALSE;
     wdw_hndl = gl_rmsg[3];               /* wdw handle of mesag     */
@@ -513,9 +528,9 @@ BOOLEAN     hndl_mesag()
 } /* hndl_mesag */
 
 
-void send_redraw(WORD wh, GRECT *p)
+void send_redraw(short wh, GRECT *p)
 {
-    WORD    msg[8];
+    short    msg[8];
 
     msg[0] = WM_REDRAW;             /* Defined in GEMBIND.H     */
     msg[1] = gl_apid;               /* As returned by appl_init */
@@ -530,9 +545,9 @@ void send_redraw(WORD wh, GRECT *p)
 
 
 /* Handle keyboard input. Up/down/left/right cause moves; Ctrl-Q quits.  */
-BOOLEAN hndl_keybd(UWORD keycode)
+BOOLEAN hndl_keybd(unsigned short keycode)
 {
-    short result, row, col;
+    short result = 0, row, col;
     GRECT rc, rct;
     int redraw = 0;
 
@@ -554,6 +569,7 @@ BOOLEAN hndl_keybd(UWORD keycode)
         gl_rmsg[0] = WM_CLOSED;
         return hndl_mesag();
     }
+
     /* In case of a victory, redraw the board to show it and then
      * pop up the victory message. */
     if (result == 2)
@@ -563,19 +579,19 @@ BOOLEAN hndl_keybd(UWORD keycode)
         gl_rmsg[0] = WM_CLOSED;
         return hndl_mesag();
     }
-    /* Otherwise, if the move was successful add a new tile to the
-     * board. */
+
+    /* Otherwise, if the move was successful add a new tile to the board. */
     if (result == 1)
     {
         gb_newtile(&gl_board);
     }
+
     /* Invalidate updated area(s) of the board */
     for (row = 0; row < 4; row++)
     {
         for (col = 0; col < 4; col++)
         {
-            /* If a tile has not been updated, add its rectangle to the update
- * rectangle. */
+            /* If a tile has not been updated, add its rectangle to the update rectangle. */
             if (gl_board.tile[row+1][col+1] !=
                     gl_oldboard.tile[row+1][col+1])
             {
@@ -585,12 +601,12 @@ BOOLEAN hndl_keybd(UWORD keycode)
                 rct.g_h = 5 * gl_hbox - 2;
                 if (redraw) rc_union(&rct, &rc);
                 else         rc = rct;
-                gl_oldboard.tile[row+1][col+1] =
-                        gl_board.tile[row+1][col+1];
+                gl_oldboard.tile[row+1][col+1] = gl_board.tile[row+1][col+1];
                 redraw = 1;
             }
         }
     }
+
     if (redraw)
     {
         /* This should be faster but I haven't got it working
@@ -609,7 +625,7 @@ BOOLEAN hndl_keybd(UWORD keycode)
 void g2048(void)
 {
     BOOLEAN     done;
-    WORD mx, my, mb, ks, kr, br;
+    short mx, my, mb, ks, kr, br;
 
     /**/                         /* loop handling user     */
     /**/                         /*   input until done     */
@@ -617,11 +633,12 @@ void g2048(void)
 
 
 
-    while( !done )                    /*   then forever     */
+    while (!done)               /*   then forever     */
     {
         /* If the window is open and there are no more moves
          * possible, then tell the user they have lost and
          * close the window. */
+
         if (g2048_whndl != 0 && !gb_canmove(&gl_board))
         {
             disp_board(&work_area);
@@ -684,14 +701,13 @@ void g2048_term()
 /*------------------------------*/
 /* g2048_init                   */
 /*------------------------------*/
-WORD g2048_init()
+short g2048_init()
 {
-    WORD i;
-    WORD work_in[11];
-    WORD attributes[10];
-    WORD rgb[3];
-    BYTE buf[20];
-    BYTE *sc;
+    short i;
+    short work_in[11];
+    short attributes[10];
+    short rgb[3];
+    char *sc;
     time_t t;
 
     /* Initialise PRNG */
@@ -761,7 +777,7 @@ WORD g2048_init()
     return(TRUE);
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
     if (g2048_init())               /* initialization     */
     {

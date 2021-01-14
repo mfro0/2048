@@ -132,22 +132,17 @@ static void gb_moveud(GAMEBOARD *g, int col, int dy)
     }
 }
 
-
-
-
-
-
 /* Attempt a move */
 int gb_move(GAMEBOARD *g, int dx, int dy)
 {
     int row, col;
     GAMEBOARD g2;
 
-    gb_clearmerge(g);	/* Clear any 'new tile' flags from previous
-                 * move */
+    gb_clearmerge(g);	/* Clear any 'new tile' flags from previous move */
 
     /* Remember state of game before the move */
-    memcpy(&g2, g, sizeof(g2));
+    g2 = *g;
+
     if (dy == 0)
     {
         /* Move each row horizontally */
@@ -166,17 +161,22 @@ int gb_move(GAMEBOARD *g, int dx, int dy)
         }
 
     }
+
     /* If the move did not change game state, it is ignored */
     if (!memcmp(&g2, g, sizeof(g2)))
     {
         return 0;	/* No tile moved */
     }
+
     /* Check for any 2048 tiles (victory condition) */
-    for (row = 1; row <= 4; row++) for (col = 1; col <= 4; col++)
+    for (row = 1; row <= 4; row++)
     {
-        if ((g->tile[row][col] & ~MERGED) == 2048)
+        for (col = 1; col <= 4; col++)
         {
-            return 2;
+            if ((g->tile[row][col] & ~MERGED) == 2048)
+            {
+                return 2;
+            }
         }
     }
     return 1;
@@ -187,9 +187,12 @@ void gb_clearmerge(GAMEBOARD *g)
 {
     int row, col;
 
-    for (row = 1; row <= 4; row++) for (col = 1; col <= 4; col++)
+    for (row = 1; row <= 4; row++)
     {
-        g->tile[row][col] &= ~MERGED;
+        for (col = 1; col <= 4; col++)
+        {
+            g->tile[row][col] &= ~MERGED;
+        }
     }
 }
 
@@ -199,10 +202,13 @@ int gb_canmove(GAMEBOARD *g)
 {
     GAMEBOARD g2;
 
-    /* Brute-force approach: Try all four of the user's possible moves and see if
- * any of them changed the board state. If gb_move() returned zero the board
- * was unchanged, so we don't need to restore it before each attempt. */
-    memcpy(&g2, g, sizeof(g2));
+    /*
+     * Brute-force approach: Try all four of the user's possible moves and see if
+     * any of them changed the board state. If gb_move() returned zero the board
+     * was unchanged, so we don't need to restore it before each attempt.
+     */
+
+    g2 = *g;
     gb_clearmerge(&g2);
 
     if (gb_move(&g2, -1,  0) ||
