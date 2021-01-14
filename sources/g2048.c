@@ -452,77 +452,77 @@ BOOLEAN     hndl_mesag()
     wdw_hndl = gl_rmsg[3];               /* wdw handle of mesag     */
     switch( gl_rmsg[0] )               /* switch on type of msg*/
     {
-    case AC_OPEN:                    /* do accessory open     */
-        if ( (gl_rmsg[4] == gl_itemg2048) &&
-             (!g2048_whndl) )          /* unless already open     */
-        {
-            graf_mouse(BUSY_BEE, 0x0L);
-            g2048_whndl = wind_create(WDW_STYLE, align_x(gl_xfull)-1, gl_yfull, gl_wfull, gl_hfull);
-            if (g2048_whndl == -1)
+        case AC_OPEN:                    /* do accessory open     */
+            if ( (gl_rmsg[4] == gl_itemg2048) &&
+                 (!g2048_whndl) )          /* unless already open     */
+            {
+                graf_mouse(BUSY_BEE, 0x0L);
+                g2048_whndl = wind_create(WDW_STYLE, align_x(gl_xfull)-1, gl_yfull, gl_wfull, gl_hfull);
+                if (g2048_whndl == -1)
+                {
+                    graf_mouse(ARROW, 0x0L);
+                    rsrc_alert(NOWINDOW, 1);
+                    g2048_whndl = 0;
+                    return(TRUE);
+                }
+                new_game();
+                update_score();
+                if (g2048_whndl)
+                {
+                    wind_set_str(g2048_whndl, WF_NAME, wdw_title);
+                    wind_set_str(g2048_whndl, WF_INFO, status);
+                }
+                wdw_size(&box, MESS_WIDTH, MESS_NLINES);
+#if     DESKACC                         /* open from menu area     */
+                do_open(g2048_whndl, gl_wbox*4, gl_hbox/2, box.g_x, box.g_y, box.g_w, box.g_h);
+#else                              /* open from screen cntr*/
+                do_open(g2048_whndl, gl_wfull/2, gl_hfull/2, box.g_x, box.g_y, box.g_w, box.g_h);
+#endif
+                wind_get(g2048_whndl, WF_WORKXYWH,     &work_area.g_x, &work_area.g_y, &work_area.g_w, &work_area.g_h);
+                disp_board(&work_area);
+                graf_mouse(ARROW,0x0L);
+            }
+            else
             {
                 graf_mouse(ARROW, 0x0L);
-                rsrc_alert(NOWINDOW, 1);
-                g2048_whndl = 0;
-                return(TRUE);
+                wind_set(g2048_whndl, WF_TOP, 0, 0, 0, 0);
             }
-            new_game();
-            update_score();
-            if (g2048_whndl)
+            break;
+
+        case AC_CLOSE:                    /* do accessory close     */
+            if ( (gl_rmsg[3] == gl_itemg2048) &&
+                 (g2048_whndl) )
             {
-                wind_set_str(g2048_whndl, WF_NAME, wdw_title);
-                wind_set_str(g2048_whndl, WF_INFO, status);
+                g2048_whndl = 0;     /* reset window handle     */
             }
-            wdw_size(&box, MESS_WIDTH, MESS_NLINES);
-#if     DESKACC                         /* open from menu area     */
-            do_open(g2048_whndl, gl_wbox*4, gl_hbox/2, box.g_x, box.g_y, box.g_w, box.g_h);
-#else                              /* open from screen cntr*/
-            do_open(g2048_whndl, gl_wfull/2, gl_hfull/2, box.g_x, box.g_y, box.g_w, box.g_h);
-#endif
-            wind_get(g2048_whndl, WF_WORKXYWH,     &work_area.g_x, &work_area.g_y, &work_area.g_w, &work_area.g_h);
-            disp_board(&work_area);
-            graf_mouse(ARROW,0x0L);
-        }
-        else
-        {
-            graf_mouse(ARROW, 0x0L);
-            wind_set(g2048_whndl, WF_TOP, 0, 0, 0, 0);
-        }
-        break;
+            break;
 
-    case AC_CLOSE:                    /* do accessory close     */
-        if ( (gl_rmsg[3] == gl_itemg2048) &&
-             (g2048_whndl) )
-        {
-            g2048_whndl = 0;     /* reset window handle     */
-        }
-        break;
+        case WM_REDRAW:                    /* do redraw wdw contnts*/
+            do_redraw(wdw_hndl, (GRECT *) &gl_rmsg[4]);
+            break;
 
-    case WM_REDRAW:                    /* do redraw wdw contnts*/
-        do_redraw(wdw_hndl, (GRECT *) &gl_rmsg[4]);
-        break;
+        case WM_TOPPED:                    /* do window topped     */
+            wind_set(wdw_hndl, WF_TOP, 0, 0, 0, 0);
+            break;
 
-    case WM_TOPPED:                    /* do window topped     */
-        wind_set(wdw_hndl, WF_TOP, 0, 0, 0, 0);
-        break;
-
-    case WM_CLOSED:                    /* do window closed     */
+        case WM_CLOSED:                    /* do window closed     */
 #if     DESKACC                         /* close to menu bar     */
-        do_close(g2048_whndl, gl_wbox*4, gl_hbox/2);
+            do_close(g2048_whndl, gl_wbox*4, gl_hbox/2);
 #else                              /* close to screen cntr     */
-        do_close(g2048_whndl, gl_wfull/2, gl_hfull/2);
+            do_close(g2048_whndl, gl_wfull/2, gl_hfull/2);
 #endif
-        wind_delete(g2048_whndl);
-        g2048_whndl = 0;
-        done = TRUE;
-        break;
+            wind_delete(g2048_whndl);
+            g2048_whndl = 0;
+            done = TRUE;
+            break;
 
-    case WM_MOVED:                    /* do window move     */
-        wind_set(wdw_hndl, WF_CURRXYWH, align_x(gl_rmsg[4])-1, gl_rmsg[5], gl_rmsg[6], gl_rmsg[7]);
-        wind_get(g2048_whndl, WF_WORKXYWH,     &work_area.g_x, &work_area.g_y, &work_area.g_w, &work_area.g_h);
-        break;
+        case WM_MOVED:                    /* do window move     */
+            wind_set(wdw_hndl, WF_CURRXYWH, align_x(gl_rmsg[4])-1, gl_rmsg[5], gl_rmsg[6], gl_rmsg[7]);
+            wind_get(g2048_whndl, WF_WORKXYWH,     &work_area.g_x, &work_area.g_y, &work_area.g_w, &work_area.g_h);
+            break;
 
-    default:
-        break;
+        default:
+            break;
     } /* switch */
     return(done);
 } /* hndl_mesag */
@@ -553,21 +553,21 @@ BOOLEAN hndl_keybd(unsigned short keycode)
 
     switch (keycode)
     {
-    case 0x4B00: case 'h': case 'H':
-        result = gb_move(&gl_board, -1, 0);
-        break;
-    case 0x4D00: case 'l': case 'L':
-        result = gb_move(&gl_board, 1, 0);
-        break;
-    case 0x4800: case 'k': case 'K':
-        result = gb_move(&gl_board, 0, -1);
-        break;
-    case 0x5000: case 'j': case 'J':
-        result = gb_move(&gl_board, 0, 1);
-        break;
-    case 0x1011:     // Ctrl-Q to quit
-        gl_rmsg[0] = WM_CLOSED;
-        return hndl_mesag();
+        case 0x4B00: case 'h': case 'H':
+            result = gb_move(&gl_board, -1, 0);
+            break;
+        case 0x4D00: case 'l': case 'L':
+            result = gb_move(&gl_board, 1, 0);
+            break;
+        case 0x4800: case 'k': case 'K':
+            result = gb_move(&gl_board, 0, -1);
+            break;
+        case 0x5000: case 'j': case 'J':
+            result = gb_move(&gl_board, 0, 1);
+            break;
+        case 0x1011:     // Ctrl-Q to quit
+            gl_rmsg[0] = WM_CLOSED;
+            return hndl_mesag();
     }
 
     /* In case of a victory, redraw the board to show it and then
