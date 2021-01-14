@@ -136,19 +136,7 @@ void update_score(void)
         return;     /* Window not open */
     }
 
-#ifdef NOT_USED
-    /* If the AES allows us to maintain a high score, show it */
-    if (gl_xbuf.abilities & ABLE_PROP)
-    {
-        sprintf(status, scoret, gl_board.score, gl_hiscore);
-    }
-    else     /* Otherwise just show the score */
-    {
-        sprintf(status, scoret, gl_board.score);
-    }
-#endif
     wind_set_str(g2048_whndl, WF_INFO, status);
-
 }
 
 
@@ -166,12 +154,13 @@ void new_game(void)
 /* Compute the union of two rectangles */
 void rc_union(GRECT *p1, GRECT *p2)
 {
-    short            tx, ty, tw, th;
+    short tx, ty, tw, th;
 
     tw = max(p1->g_x + p1->g_w, p2->g_x + p2->g_w);
     th = max(p1->g_y + p1->g_h, p2->g_y + p2->g_h);
     tx = min(p1->g_x, p2->g_x);
     ty = min(p1->g_y, p2->g_y);
+
     p2->g_x = tx;
     p2->g_y = ty;
     p2->g_w = tw - tx;
@@ -185,14 +174,14 @@ void rc_union(GRECT *p1, GRECT *p2)
 /*------------------------------*/
 short do_open(short wh, short org_x, short org_y, short x, short y, short w, short h)     /* grow and open specified wdw     */
 {
-    short     ret_code;
+    short ret;
 
-    graf_mouse(2,0x0L);
+    graf_mouse(BUSY_BEE, 0);
     graf_growbox(org_x, org_y, 21, 21, x, y, w, h);
-    ret_code = wind_open(wh, x, y, w, h);
-    graf_mouse(ARROW,0x0L);
+    ret = wind_open(wh, x, y, w, h);
+    graf_mouse(ARROW, 0);
 
-    return(ret_code);
+    return ret;
 }
 
 
@@ -312,7 +301,7 @@ void draw_tile(unsigned short tile, int x, int y)
     {
         /* If there are fewer than 16 colours, select a pattern
          * as well as a colour for the tile. */
-        vsf_interior(vdi_handle, 2);
+        vsf_interior(vdi_handle, FIS_PATTERN);
         vsf_style(vdi_handle, ink - G_RED + 8);
     }
     else
