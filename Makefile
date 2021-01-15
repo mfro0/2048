@@ -119,19 +119,3 @@ printvars:
 ifneq (clean,$(MAKECMDGOALS))
 -include $(DEPEND)
 endif
-
-test: $(TEST_APP)
-	$(HATARI) --grab -w --tos /usr/share/hatari/etos512k.img \
-	--machine falcon -s 14 --cpuclock 32 --cpulevel 3 \
-	-d . $(APP)
-
-ftest: $(TEST_APP)
-	$(HATARI) --grab -w --tos /usr/share/hatari/tos404.img \
-	--machine falcon --cpuclock 32 --cpulevel 3 \
-	-d . $(APP)
-
-sttest: $(TEST_APP)
-	$(HATARI) --grab -w --tos "/usr/share/hatari/tos106de.img" \
-	--machine st --cpuclock 32 --cpulevel 3  --vdi true --vdi-planes 4 \
-	--vdi-width 640 --vdi-height 480 \
-	-d . $(APP)
