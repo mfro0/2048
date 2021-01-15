@@ -1,0 +1,57 @@
+2048: Sliding-block puzzle game for GEM             John Elliott, 7 July 2014
+=============================================================================
+
+  This is a reimplementation for GEM and C of the game '2048' by Gabriele 
+Cirulli. It's been written and tested on PC GEM, but should be readily 
+portable to Atari GEM.
+
+  Two versions are supplied: 2048.APP (a standalone program) and 2048.ACC (a 
+desk accessory).
+
+Installation
+============
+
+  To install the Desk Accessory version, copy 2048.ACC and 2048.RSC to the 
+startup directory ( \GEMBOOT on GEM/1 and GEM/2, \GEMAPPS\GEMSYS on GEM/3 and
+later). 
+
+  2048 will work with ViewMAX, provided you're using a FreeGEM video driver
+rather than a Digital Research one.
+
+Gameplay
+========
+
+  Control is by means of the cursor keys - up / down / left / right. 
+
+  When a block collides with another with the same score, the two combine. 
+If you're running GEM on a system with a colour display, newly-combined blocks 
+will be shown with a red border.
+
+  On each move, a new tile (either scoring 2 or 4) will be added to the board.
+
+  You win by combining two 1024 tiles to make 2048. You lose if the board is
+completely full and no move will combine any tiles.
+
+  If you are running on FreeGEM, your high score will be recorded.
+
+Licence
+=======  
+
+    2048: Sliding-block puzzle game 
+
+    Copyright (C) 2014  John Elliott <jce@seasip.demon.co.uk>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
