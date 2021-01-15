@@ -25,6 +25,15 @@
 #include "2048game.h"
 
 
+//#define DEBUG
+#ifdef DEBUG
+#include "natfeats.h"
+#define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
+#define out(format, arg...) do { nf_printf("" format, ##arg); } while (0)
+#else
+#define dbg(format, arg...) do { ; } while (0)
+#endif /* DEBUG */
+
 /* Initialise the board for a new game. Border tiles round the edge,
  * empty spaces in the middle, and score = 0. */
 void gb_init(GAMEBOARD *g)
@@ -51,6 +60,8 @@ void gb_init(GAMEBOARD *g)
  * full. */
 void gb_newtile(GAMEBOARD *g)
 {
+    int loop = 0;
+
     while (1)
     {
         int r = 1 + (rand() % 4);
@@ -62,6 +73,9 @@ void gb_newtile(GAMEBOARD *g)
 
             return;
         }
+        dbg("loop %d, r = %d, c = %d\r\n", loop++, r, c);
+        if (loop >= 10000)
+            return;
     }
 }
 

@@ -24,33 +24,33 @@
  * which the copyright is below */
 
 /************************************************************************/
-/*     File:     g2048.c                                   */
+/*     File:     g2048.c                                                */
+/************************************************************************/
+/*                                                                      */
+/*               GGGGG        EEEEEEEE     MM      MM                   */
+/*             GG             EE           MMMM  MMMM                   */
+/*             GG   GGG       EEEEE        MM  MM  MM                   */
+/*             GG   GG        EE           MM      MM                   */
+/*               GGGGG        EEEEEEEE     MM      MM                   */
+/*                                                                      */
 /************************************************************************/
 /*                                             */
-/*               GGGGG        EEEEEEEE     MM      MM          */
-/*             GG             EE           MMMM  MMMM          */
-/*             GG   GGG       EEEEE        MM  MM  MM          */
-/*             GG   GG        EE           MM      MM          */
-/*               GGGGG        EEEEEEEE     MM      MM          */
+/*                 +--------------------------+                         */
+/*                 | Digital Research, Inc.   |                         */
+/*                 | 60 Garden Court          |                         */
+/*                 | Monterey, CA.    93940   |                         */
+/*                 +--------------------------+                         */
 /*                                             */
-/************************************************************************/
-/*                                             */
-/*                 +--------------------------+               */
-/*                 | Digital Research, Inc.   |               */
-/*                 | 60 Garden Court          |               */
-/*                 | Monterey, CA.    93940   |               */
-/*                 +--------------------------+               */
-/*                                             */
-/*   The  source code  contained in  this listing is a non-copyrighted     */
-/*   work which  can be  freely used.  In applications of  this source     */
-/*   code you  are requested to  acknowledge Digital Research, Inc. as     */
-/*   the originator of this code.                         */
-/*                                             */
-/*   Author:     Tom Rolander                              */
-/*   PRODUCT:     GEM Sample Desk Top Accessory                    */
-/*   Module:     HELLO                                   */
-/*   Version:     February 15, 1985                         */
-/*                                             */
+/*   The source code contained in this listing is a non-copyrighted     */
+/*   work which can be freely used. In applications of this source      */
+/*   code you are requested to acknowledge Digital Research, Inc. as    */
+/*   the originator of this code.                                       */
+/*                                                                      */
+/*   Author:     Tom Rolander                                           */
+/*   PRODUCT:     GEM Sample Desk Top Accessory                         */
+/*   Module:     HELLO                                                  */
+/*   Version:     February 15, 1985                                     */
+/*                                                                      */
 /************************************************************************/
 
 
@@ -68,37 +68,37 @@
 #define WDW_STYLE NAME | INFO | CLOSER | MOVER
 
 
-static short gl_wchar;              /* character width          */
-static short gl_hchar;              /* character height          */
-static short gl_wbox;               /* box (cell) width          */
-static short gl_hbox;               /* box (cell) height          */
-static short gem_handle;            /* GEM vdi handle          */
-static short vdi_handle;            /* g2048 vdi handle          */
-static short work_out[57];          /* open virt workstation values     */
+static short gl_wchar;              /* character width              */
+static short gl_hchar;              /* character height             */
+static short gl_wbox;               /* box (cell) width             */
+static short gl_hbox;               /* box (cell) height            */
+static short tilesize;              /* size of a tile (square)      */
+static short gem_handle;            /* GEM vdi handle               */
+static short vdi_handle;            /* g2048 vdi handle             */
+static short work_out[57];          /* open virt workstation values */
 static GRECT work_area;             /* current window work area     */
-static short gl_rmsg[8];            /* message buffer          */
+static short gl_rmsg[8];            /* message buffer               */
 
-static short gl_itemg2048 = 0;      /* g2048 menu item          */
-static short gl_xfull;              /* full window 'x'          */
-static short gl_yfull;              /* full window 'y'          */
-static short gl_wfull;              /* full window 'w' width     */
-static short gl_hfull;              /* full window 'h' height     */
-static short ev_which;              /* event message returned value     */
+static short gl_itemg2048 = 0;      /* g2048 menu item              */
+static short gl_xfull;              /* full window 'x'              */
+static short gl_yfull;              /* full window 'y'              */
+static short gl_wfull;              /* full window 'w' width        */
+static short gl_hfull;              /* full window 'h' height       */
+static short ev_which;              /* event message returned value */
 
 static short g2048_whndl = 0;       /* g2048 window handle          */
-static short type_size;             /* system font cell size     */
+static short type_size;             /* system font cell size        */
 
 #define MESS_NLINES 20              /* maximum lines in message     */
 #define MESS_WIDTH 20               /* maximum width of message     */
 
 static char *wdw_title = " 2048 ";
-static char status[32];             /* Score: line */
+static char status[32];             /* Score: line                  */
 static char scoret[80];             /* sprintf() template for "Score:" line */
 // X_BUF_V2 gl_xbuf;                /* AES abilities from appl_init() */
-static short st_textc[16];          /* Text 'contrast' colours */
+static short st_textc[16];          /* Text 'contrast' colours      */
 
 static GAMEBOARD gl_board, gl_oldboard;     /* Game current and previous state */
-static long gl_hiscore;             /* High score (FreeGEM only) */
 
 
 #define max(a, b) (a > b) ? a : b
@@ -202,10 +202,10 @@ static void wdw_size(GRECT *box, short w, short h)     /* compute window size fo
 {
     short pw, ph;
 
-    vst_height(vdi_handle, type_size, &gl_wchar, &gl_hchar, &gl_wbox, &gl_hbox);
+    vst_height(vdi_handle, type_size, &gl_wchar, &gl_hchar, &gl_wbox, &tilesize);
 
-    pw = w * gl_wbox + 1;
-    ph = h * gl_hbox + 1;
+    pw = w * tilesize + 1;
+    ph = h * tilesize + 1;
 
     wind_calc(WC_BORDER, WDW_STYLE, gl_wfull / 2 - pw / 2, gl_hfull / 2 - ph / 2, pw, ph,
               &box->g_x, &box->g_y, &box->g_w, &box->g_h);
@@ -226,10 +226,10 @@ static void draw_tile(unsigned short tile, int x, int y)
     char caption[8];
 
     /* Draw the space at the edge of the tile */
-    pxy[0] = x + 5 * gl_wbox - 1;
+    pxy[0] = x + 5 * tilesize - 1;
     pxy[1] = y;
     pxy[2] = pxy[0];
-    pxy[3] = y + 5 * gl_hbox - 1;
+    pxy[3] = y + 5 * tilesize - 1;
     pxy[4] = x;
     pxy[5] = pxy[3];
     vsl_color(vdi_handle, G_WHITE);
@@ -247,8 +247,8 @@ static void draw_tile(unsigned short tile, int x, int y)
 
     pxy[0] = x;
     pxy[1] = y;
-    pxy[2] = x + 5 * gl_wbox - 2;
-    pxy[3] = y + 5 * gl_hbox - 2;
+    pxy[2] = x + 5 * tilesize - 2;
+    pxy[3] = y + 5 * tilesize - 2;
 
     /* If the tile is an empty space, draw a 50% grey rectangle. */
     if (tile == 0)
@@ -289,11 +289,11 @@ static void draw_tile(unsigned short tile, int x, int y)
 
     /* Fill the tile */
     vr_recfl(vdi_handle, pxy);
-    pxy[0] = x + ((5 - strlen(caption)) * gl_wbox) / 2 - 1;
-    pxy[1] = y + 3 * gl_hbox - 1;
+    pxy[0] = x + ((5 - strlen(caption)) * tilesize) / 2 - 1;
+    pxy[1] = y + 3 * tilesize - 1;
 
     /* Draw its value */
-    if (work_out[13] < 16)
+    if (work_out[13] < 16)      /* less than 16 colors available? */
     {
         v_gtext(vdi_handle, pxy[0], pxy[1], caption);
     }
@@ -309,8 +309,8 @@ static void draw_tile(unsigned short tile, int x, int y)
     pxy[0] = x;
     pxy[1] = y;
     pxy[2] = x;
-    pxy[3] = y + 5 * gl_hbox - 2;
-    pxy[4] = x + 5 * gl_wbox - 2;
+    pxy[3] = y + 5 * tilesize - 2;
+    pxy[4] = x + 5 * tilesize - 2;
     pxy[5] = pxy[3];
     pxy[6] = pxy[4];
     pxy[7] = y;
@@ -346,9 +346,9 @@ static void disp_board(GRECT *clip_area) /* display an area of the board     */
         {
             draw_tile(gl_board.tile[row+1][col+1],
                     xcurr, ycurr);
-            xcurr += 5 * gl_wbox;
+            xcurr += 5 * tilesize;
         }
-        ycurr += 5 * gl_hbox;
+        ycurr += 5 * tilesize;
     }
 
     graf_mouse(M_ON, 0x0L);
@@ -364,10 +364,6 @@ static void do_redraw(short wh, GRECT *area)          /* redraw message applying
     graf_mouse(M_OFF, 0x0L);
     if (gl_board.score != gl_oldboard.score)
     {
-        if (gl_board.score > gl_hiscore)
-        {
-            gl_hiscore = gl_board.score;
-        }
         update_score();
         gl_oldboard.score = gl_board.score;
     }
@@ -417,11 +413,7 @@ static bool hndl_mesag()
                     wind_set_str(g2048_whndl, WF_INFO, status);
                 }
                 wdw_size(&box, MESS_WIDTH, MESS_NLINES);
-#if     DESKACC                         /* open from menu area     */
-                do_open(g2048_whndl, gl_wbox*4, gl_hbox/2, box.g_x, box.g_y, box.g_w, box.g_h);
-#else                              /* open from screen cntr*/
                 do_open(g2048_whndl, gl_wfull/2, gl_hfull/2, box.g_x, box.g_y, box.g_w, box.g_h);
-#endif
                 wind_get(g2048_whndl, WF_WORKXYWH,     &work_area.g_x, &work_area.g_y, &work_area.g_w, &work_area.g_h);
                 disp_board(&work_area);
                 graf_mouse(ARROW, 0);
@@ -450,7 +442,7 @@ static bool hndl_mesag()
             break;
 
         case WM_CLOSED:                    /* do window closed     */
-            do_close(g2048_whndl, gl_wbox*4, gl_hbox/2);
+            do_close(g2048_whndl, tilesize*4, tilesize/2);
             wind_delete(g2048_whndl);
             g2048_whndl = 0;
             done = true;
@@ -543,10 +535,10 @@ static bool hndl_keybd(unsigned short keycode)
             if (gl_board.tile[row+1][col+1] !=
                     gl_oldboard.tile[row+1][col+1])
             {
-                rct.g_x = work_area.g_x + row * 5 * gl_wbox;
-                rct.g_y = work_area.g_y + col * 5 * gl_hbox;
-                rct.g_w = 5 * gl_wbox - 2;
-                rct.g_h = 5 * gl_hbox - 2;
+                rct.g_x = work_area.g_x + row * 5 * tilesize;
+                rct.g_y = work_area.g_y + col * 5 * tilesize;
+                rct.g_w = 5 * tilesize - 2;
+                rct.g_h = 5 * tilesize - 2;
                 if (redraw) rc_union(&rct, &rc);
                 else         rc = rct;
                 gl_oldboard.tile[row+1][col+1] = gl_board.tile[row+1][col+1];
@@ -608,20 +600,13 @@ static void g2048(void)
             done = hndl_keybd(kr);     /* handle keypress */
         }
         wind_update(END_UPDATE);     /* end window update     */
-#if     DESKACC
-        done = false;     /* never exit loop for desk accessory     */
-#endif
     }
 }
 
 static void g2048_term()
 {
-#if DESKACC
-    return(false);              /* Desk Accessory never ends     */
-#else
     v_clsvwk( vdi_handle );     /* close virtual work station     */
     appl_exit();                /* application exit          */
-#endif
 }
 
 static short g2048_init()
@@ -639,30 +624,23 @@ static short g2048_init()
 
     gl_apid = appl_init();          /* initialize libraries     */
 
-#if DESKACC
-    wind_update(BEG_UPDATE);
-#endif
-
     for (i = 0; i < 10; i++)
     {
         work_in[i] = 1;
     }
     work_in[10] = 2;
     gem_handle = graf_handle(&gl_wchar, &gl_hchar, &gl_wbox, &gl_hbox);
+    tilesize = max(gl_wbox, gl_hbox);
+
     vdi_handle = gem_handle;
-    v_opnvwk(work_in, &vdi_handle, work_out);     /* open virtual work stn*/
+    v_opnvwk(work_in, &vdi_handle, work_out);
 
     /* Load resources */
     if (!rsrc_load("2048.rsc"))
     {
         form_alert(1, "[3][Fatal Error|2048.RSC not found][ Abort ]");
-#ifdef DESKACC     /* DAs can't terminate. Instead, just don't register our */
-        /* menu option, so the drawing code will never be called. */
-        type_size = 0;
-#else
-        return false;
-#endif
 
+        return false;
     }
     vqt_attributes(vdi_handle, attributes);
     type_size = attributes[7];          /* get system font hbox     */
@@ -688,13 +666,9 @@ static short g2048_init()
         else     st_textc[i] = G_WHITE;
     }
 
-#if DESKACC          /* enter g2048 in menu     */
-    if (type_size)     /* (only if initialisation succeeded) */
-        gl_itemg2048 = menu_register(gl_apid, ADDR("  2048") );
-#else
     if (vdi_handle == 0)
         return(false);
-#endif
+
     /* init. message address*/
     wind_get(DESK, WF_WORKXYWH, &gl_xfull, &gl_yfull, &gl_wfull, &gl_hfull);
     return(true);
@@ -704,10 +678,6 @@ int main(void)
 {
     if (g2048_init())               /* initialization     */
     {
-#if DESKACC
-        wind_update(END_UPDATE);
-        g2048();
-#else                              /* simulate AC_OPEN     */
         gl_rmsg[0] = AC_OPEN;
         gl_rmsg[4] = gl_itemg2048;
         hndl_mesag();
@@ -715,7 +685,6 @@ int main(void)
         g2048();
 
         g2048_term();               /* termination          */
-#endif
     }
     return 0;
 }

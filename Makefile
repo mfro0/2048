@@ -55,7 +55,8 @@ INCLUDE+=-I$(INCDIR)
 
 CSRCS=\
 	$(SRCDIR)/2048game.c\
-	$(SRCDIR)/g2048.c
+	$(SRCDIR)/g2048.c \
+	$(SRCDIR)/natfeats.c
 
 ASRCS=\
 	$(SRCDIR)/nkcc-gc.S \
@@ -80,7 +81,7 @@ m5475/mshort/$(APP): CFLAGS += -mcpu=5475 -mshort
 ctest: $(TEST_APP)
 all: $(patsubst %,%/$(APP),$(TRGTDIRS))
 
-$(DEPEND): $(ASRCS) $(CSRCS) 
+$(DEPEND): $(ASRCS) $(CSRCS)
 	-rm -f $(DEPEND)
 	$(Q)for d in $(TRGTDIRS);\
 		do $(CC) $(CFLAGS) $(INCLUDE) -M $(ASRCS) $(CSRCS) | sed -e "s#^\(.*\).o:#$$d/objs/\1.o:#" >> $(DEPEND); \
@@ -108,7 +109,7 @@ $(foreach DIR,$(TRGTDIRS),$(eval $(call CC_TEMPLATE,$(DIR))))
 
 clean:
 	@rm -f $(patsubst %,%/objs/*.o,$(TRGTDIRS)) $(patsubst %,%/$(APP),$(TRGTDIRS))
-	@rm -f $(DEPEND) mapfile 
+	@rm -f $(DEPEND) mapfile
 
 .PHONY: printvars
 printvars:
